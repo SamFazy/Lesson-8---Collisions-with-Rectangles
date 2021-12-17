@@ -11,6 +11,7 @@ namespace Lesson_8___Collisions_with_Rectangles
         private SpriteBatch _spriteBatch;
 
         KeyboardState keyboardState;
+        MouseState mouseState;
 
         Texture2D pacUpTexture;
         Texture2D pacDownTexture;
@@ -26,8 +27,10 @@ namespace Lesson_8___Collisions_with_Rectangles
 
         Texture2D barrierTexture;
         Rectangle barrierRect1, barrierRect2;
+        List<Rectangle> barriers;
 
         Texture2D coinTexture;
+        Rectangle coinRect;
         List<Rectangle> coins; 
 
         int pacSpeed;
@@ -49,8 +52,11 @@ namespace Lesson_8___Collisions_with_Rectangles
             pacSpeed = 3;
             pacLocation = new Rectangle(10, 10, 60, 60);
 
-            barrierRect1 = new Rectangle(0, 250, 350, 75);
-            barrierRect2 = new Rectangle(450, 250, 350, 75);
+            //barrierRect1 = new Rectangle(0, 250, 350, 75);
+            //barrierRect2 = new Rectangle(450, 250, 350, 75);
+            barriers = new List<Rectangle>();
+            barriers.Add(new Rectangle(0, 250, 350, 75));
+            barriers.Add(new Rectangle(450, 250, 350, 75));
 
             coins = new List<Rectangle>();
             coins.Add(new Rectangle(400, 50, coinTexture.Width, coinTexture.Height));
@@ -88,10 +94,27 @@ namespace Lesson_8___Collisions_with_Rectangles
         protected override void Update(GameTime gameTime)
         {
             keyboardState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             // TODO: Add your update logic here
+
+            if (mouseState.LeftButton == ButtonState.Pressed)
+                if (exitRect.Contains(mouseState.X, mouseState.Y))
+                    Exit();
+
+            if (exitRect.Contains(pacLocation))
+                Exit();
+
+            foreach (Rectangle barrier in barriers)
+                if (pacLocation.Intersects(barrier))
+                {
+                    pacLocation = new Rectangle(10, 10, 60, 60);
+                }
+                
+
 
             if (keyboardState.IsKeyDown(Keys.Up))
             {
@@ -129,12 +152,12 @@ namespace Lesson_8___Collisions_with_Rectangles
 
             if (pacLocation.Bottom >= _graphics.PreferredBackBufferHeight)
             {
-                pacLocation.Y = _graphics.PreferredBackBufferHeight - 75;
+                pacLocation.Y = _graphics.PreferredBackBufferHeight - 60;
             }
 
             if (pacLocation.Right >= _graphics.PreferredBackBufferWidth)
             {
-                pacLocation.X = _graphics.PreferredBackBufferWidth - 75;
+                pacLocation.X = _graphics.PreferredBackBufferWidth - 60;
             }
 
             for (int i = 0; i < coins.Count; i++)
@@ -157,12 +180,18 @@ namespace Lesson_8___Collisions_with_Rectangles
 
             _spriteBatch.Begin();
 
-            
-            _spriteBatch.Draw(barrierTexture, barrierRect1, Color.White);
-            _spriteBatch.Draw(barrierTexture, barrierRect2, Color.White);
+
+            foreach (Rectangle barrier in barriers)
+            {
+                _spriteBatch.Draw(barrierTexture, barrier, Color.White);
+                _spriteBatch.Draw(barrierTexture, barrier, Color.White);
+            }
+
             _spriteBatch.Draw(exitTexture, exitRect, Color.White);
             _spriteBatch.Draw(pacTexture, pacLocation, Color.White);
-            _spriteBatch.Draw(coinTexture, coinRect, Color.White);
+            
+            foreach (Rectangle coin in coins)
+                _spriteBatch.Draw(coinTexture, coin, Color.White);
 
             _spriteBatch.End();
 

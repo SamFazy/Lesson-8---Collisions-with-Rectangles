@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
 
 namespace Lesson_8___Collisions_with_Rectangles
@@ -9,6 +10,10 @@ namespace Lesson_8___Collisions_with_Rectangles
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        Random generator = new Random();
+
+        int randomYValue;
+        int randomXValue;
 
         KeyboardState keyboardState;
         MouseState mouseState;
@@ -59,10 +64,18 @@ namespace Lesson_8___Collisions_with_Rectangles
             barriers.Add(new Rectangle(450, 250, 350, 75));
 
             coins = new List<Rectangle>();
-            coins.Add(new Rectangle(400, 50, coinTexture.Width, coinTexture.Height));
-            coins.Add(new Rectangle(475, 50, coinTexture.Width, coinTexture.Height));
-            coins.Add(new Rectangle(200, 300, coinTexture.Width, coinTexture.Height));
-            coins.Add(new Rectangle(400, 300, coinTexture.Width, coinTexture.Height));
+            randomXValue = generator.Next(0, _graphics.PreferredBackBufferWidth - coinTexture.Width);
+            randomYValue = generator.Next(0, _graphics.PreferredBackBufferHeight - coinTexture.Height);
+            coins.Add(new Rectangle(randomXValue, randomYValue, coinTexture.Width, coinTexture.Height));
+            randomXValue = generator.Next(0, _graphics.PreferredBackBufferWidth - coinTexture.Width);
+            randomYValue = generator.Next(0, _graphics.PreferredBackBufferHeight - coinTexture.Height);
+            coins.Add(new Rectangle(randomXValue, randomYValue, coinTexture.Width, coinTexture.Height));
+            randomXValue = generator.Next(0, _graphics.PreferredBackBufferWidth - coinTexture.Width);
+            randomYValue = generator.Next(0, _graphics.PreferredBackBufferHeight - coinTexture.Height);
+            coins.Add(new Rectangle(randomXValue, randomYValue, coinTexture.Width, coinTexture.Height));
+            randomXValue = generator.Next(0, _graphics.PreferredBackBufferWidth - coinTexture.Width);
+            randomYValue = generator.Next(0, _graphics.PreferredBackBufferHeight - coinTexture.Height);
+            coins.Add(new Rectangle(randomXValue, randomYValue, coinTexture.Width, coinTexture.Height));
 
             exitRect = new Rectangle(700, 350, 100, 100);
         }
@@ -101,16 +114,18 @@ namespace Lesson_8___Collisions_with_Rectangles
 
             // TODO: Add your update logic here
 
+
             if (mouseState.LeftButton == ButtonState.Pressed)
                 if (exitRect.Contains(mouseState.X, mouseState.Y))
                     Exit();
 
-            if (exitRect.Contains(pacLocation))
+            if (exitRect.Contains(pacLocation) && coins.Count == 0 && mouseState.LeftButton == ButtonState.Pressed)
                 Exit();
 
             foreach (Rectangle barrier in barriers)
                 if (pacLocation.Intersects(barrier))
                 {
+
                     pacLocation = new Rectangle(10, 10, 60, 60);
                 }
                 
@@ -162,6 +177,7 @@ namespace Lesson_8___Collisions_with_Rectangles
 
             for (int i = 0; i < coins.Count; i++)
             {
+
                 if (pacLocation.Intersects(coins[i]))
                 {
                     coins.RemoveAt(i);
@@ -169,6 +185,19 @@ namespace Lesson_8___Collisions_with_Rectangles
                 }
             }
 
+            for (int i = 0; i < coins.Count; i++)
+            {
+                foreach (Rectangle barrier in barriers) 
+                    if (barrier.Intersects(coins[i]) || exitRect.Intersects(coins[i]))
+                    {
+
+                        coins.RemoveAt(i);
+                        randomXValue = generator.Next(0, _graphics.PreferredBackBufferWidth - coinTexture.Width);
+                        randomYValue = generator.Next(0, _graphics.PreferredBackBufferHeight - coinTexture.Height);
+                        coins.Add(new Rectangle(randomXValue, randomYValue, coinTexture.Width, coinTexture.Height));
+
+                    }
+            }
             base.Update(gameTime);
         }
 
